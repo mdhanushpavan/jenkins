@@ -1,0 +1,47 @@
+pipeline
+{
+    agent any
+    stages
+    {
+        stage('ContDownload')
+        {
+            steps
+            {
+                git 'https://github.com/selenium-saikrishna/maven.git'
+            }
+        }
+        stage('ContBuild')
+        {
+            steps
+            {
+                sh 'mvn package'
+            }
+        }
+        stage('ContDeployment')
+        {
+            steps
+            {
+                sh 'scp /var/lib/jenkins/workspace/Declarative_Pipeline/webapp/target/webapp.war root@192.168.0.21:/opt/apache-tomcat-9.0.14/webapps/raju.war'
+            }
+        }
+        stage('ContTesting')
+        {
+            steps
+            {
+                git 'https://github.com/selenium-saikrishna/TestingOnLinux.git'
+                sh 'java -jar  /var/lib/jenkins/workspace/Declarative_Pipeline/testing.jar'
+            }
+        }
+    }
+   post
+    {
+        success
+        {
+            input message: 'Waiting for approval from DM', submitter: 'Srinivas'
+    sh 'scp /var/lib/jenkins/workspace/Declarative_Pipeline/webapp/target/webapp.war root@192.168.0.21:/opt/apache-tomcat-9.0.14/webapps/prod.war'
+        }
+          
+    }
+
+}
+               
